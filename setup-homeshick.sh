@@ -72,6 +72,7 @@ if [[ ${castles[vim]+x} ]]; then
   "$vim_cmd" +'let g:plug_window=""|PlugInstall' || true
 fi
 if [[ ${castles[zsh]+x} ]]; then
+  mkdir "$HOME/.zsh/cache"
   echo "Exit the child shell and run 'exec zsh' if everything looks good:"
   zsh
 fi
