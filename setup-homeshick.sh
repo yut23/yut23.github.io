@@ -60,7 +60,7 @@ declare -a castle_urls
 echo "Will clone castles:"
 for castle in "${!castles[@]}"; do
   echo " $castle"
-  castle_urls+=("https://bitbucket.org/yut23/$castle-homeshick.git")
+  castle_urls+=("https://github.com/yut23/$castle-homeshick.git")
 done
 
 homeshick clone "${castle_urls[@]}"
