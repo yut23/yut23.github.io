@@ -10,7 +10,16 @@ if [[ ! -e "$REPOS" ]]; then
   git clone https://github.com/yut23/homeshick.git "$REPOS/homeshick"
   git --git-dir="$REPOS/homeshick/.git" remote add upstream https://github.com/andsens/homeshick.git || true
 fi
+# shellcheck disable=SC1091
 . "$REPOS/homeshick/homeshick.sh"
+
+if [[ ! -e "$REPOS/.gitconfig" ]]; then
+  cat > "$REPOS/.gitconfig" <<'EOF'
+[user]
+  email = yut23@gvljohnsons.com
+  name = yut23
+EOF
+fi
 
 # store as keys into an associative array (i.e. a set)
 declare -A castles
