@@ -73,9 +73,13 @@ for castle in "${!castles[@]}"; do
 done
 
 homeshick clone "${castle_urls[@]}"
-for castle in "${!castles[@]}"; do
+for castle in "${!castles[@]}" homeshick; do
   # fix any symlinks to submodules under Windows
   git -C "$REPOS/$castle" restore .
+  if [[ ${castles[git]+x} ]]; then
+    # update local gitconfig in all repos
+    ( cd "$REPOS/$castle"; "$REPOS/git/home/.git_templates/hooks/post-checkout" )
+  fi
 done
 
 if [[ ${castles[tmux]+x} ]]; then
