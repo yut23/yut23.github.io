@@ -64,6 +64,10 @@ for castle in "${!castles[@]}"; do
 done
 
 homeshick clone "${castle_urls[@]}"
+for castle in "${!castles[@]}"; do
+  # fix any symlinks to submodules under Windows
+  git -C "$REPOS/$castle" restore .
+done
 
 if [[ ${castles[tmux]+x} ]]; then
   "$HOME/.tmux/plugins/tpm/bin/install_plugins" || true

@@ -34,6 +34,10 @@ for castle in "${!castles[@]}"; do
 done
 
 yes | homeshick clone "${castle_urls[@]}" || true
+for castle in "${!castles[@]}"; do
+  # fix any symlinks to submodules under Windows
+  git -C "$REPOS/$castle" restore .
+done
 
 export TERM=xterm
 if [[ ${castles[tmux]+x} ]]; then
