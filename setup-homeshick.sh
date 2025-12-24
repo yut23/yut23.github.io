@@ -85,7 +85,7 @@ done
 if [[ ${castles[tmux]+x} ]]; then
   "$HOME/.tmux/plugins/tpm/bin/install_plugins" || true
 fi
-if [[ ${castles[vim]+x} ]]; then
+if [[ ${castles[vim]+x} ]] || [[ ${castles[neovim]+x} ]]; then
   "$vim_cmd" +'let g:plug_window=""|PlugInstall' || true
 fi
 if [[ ${castles[zsh]+x} ]]; then

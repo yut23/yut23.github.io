@@ -56,11 +56,19 @@ export TERM=xterm
 if [[ ${castles[tmux]+x} ]]; then
   "$HOME/.tmux/plugins/tpm/bin/install_plugins" || true
 fi
-if [[ ${castles[vim]+x} ]]; then
+if [[ ${castles[neovim]+x} ]]; then
   nvim +'let g:plug_window=""|PlugInstall|q' || true
 fi
-# link vim's plugged directory to neovim's, to save space
-ln -s ../.local/share/nvim/plugged ~/.vim/plugged
-mkdir "$HOME/.zsh/cache"
-# install all plugins immediately (effectively disables turbo mode)
-zsh -i -c -- '@zinit-scheduler burst'
+if [[ ${castles[vim]+x} ]]; then
+  if [[ -d ~/.local/share/nvim/plugged ]]; then
+    # link vim's plugged directory to neovim's, to save space
+    ln -s ../.local/share/nvim/plugged ~/.vim/plugged
+  else
+    vim +'let g:plug_window=""|PlugInstall|q' || true
+  fi
+fi
+if [[ ${castles[zsh]+x} ]]; then
+  mkdir "$HOME/.zsh/cache"
+  # install all plugins immediately (effectively disables turbo mode)
+  zsh -i -c -- '@zinit-scheduler burst'
+fi
