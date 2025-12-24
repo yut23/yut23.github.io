@@ -6,6 +6,7 @@ REPOS="$HOME/.homesick/repos"
 
 # parse arguments
 unattended=0
+args=()
 for arg in "$@"; do
   case "$arg" in
     -h|--help)
@@ -14,6 +15,9 @@ for arg in "$@"; do
       ;;
     --unattended)
       unattended=1
+      ;;
+    *)
+      args+=("$arg")
       ;;
   esac
 done
@@ -65,7 +69,7 @@ if [[ $# -eq 0 ]]; then
   fi
 else
   # clone castles passed as command line arguments
-  for arg in "$@"; do
+  for arg in "${args[@]}"; do
     castles[$arg]=y
   done
 fi
