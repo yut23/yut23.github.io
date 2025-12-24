@@ -1,14 +1,19 @@
 #!/bin/bash
 set -euo pipefail
+cd "$HOME" || exit
 
 REPOS="$HOME/.homesick/repos"
 
-# check for -h|--help
+# parse arguments
+unattended=0
 for arg in "$@"; do
   case "$arg" in
     -h|--help)
       echo "Installs homeshick and all applicable castles, then installs any extra plugins."
       exit 0
+      ;;
+    --unattended)
+      unattended=1
       ;;
   esac
 done
@@ -65,31 +70,52 @@ else
   done
 fi
 
-declare -a castle_urls
 echo "Will clone castles:"
+printf ' %s\n' "${!castles[@]}"
 for castle in "${!castles[@]}"; do
-  echo " $castle"
-  castle_urls+=("https://github.com/yut23/$castle-homeshick.git")
+  git clone --recursive "https://github.com/yut23/$castle-homeshick.git" "$REPOS/$castle"
+  # fix any symlinks to submodules under Windows
+  git -c core.symlinks=true -C "$REPOS/$castle" restore .
 done
 
-homeshick clone "${castle_urls[@]}"
-for castle in "${!castles[@]}" homeshick; do
-  # fix any symlinks to submodules under Windows
-  git -C "$REPOS/$castle" restore .
-  if [[ ${castles[git]+x} ]]; then
+if (( unattended )); then
+  yes | homeshick link || true
+  export TERM=xterm
+else
+  homeshick link || true
+fi
+
+if [[ ${castles[git]+x} ]]; then
+  for castle in "${!castles[@]}" homeshick; do
     # update local gitconfig in all repos
     ( cd "$REPOS/$castle"; "$REPOS/git/home/.git_templates/hooks/post-checkout" )
-  fi
-done
-
+  done
+fi
 if [[ ${castles[tmux]+x} ]]; then
   "$HOME/.tmux/plugins/tpm/bin/install_plugins" || true
 fi
-if [[ ${castles[vim]+x} ]] || [[ ${castles[neovim]+x} ]]; then
-  "$vim_cmd" +'let g:plug_window=""|PlugInstall' || true
+vim_cmd='let g:plug_window=""|PlugInstall'
+if (( unattended )); then
+  vim_cmd="$vim_cmd|q"
+fi
+if [[ ${castles[neovim]+x} ]] && command -v nvim >/dev/null 2>&1; then
+  nvim +"$vim_cmd" || true
+fi
+if [[ ${castles[vim]+x} ]]; then
+  if (( unattended )) && [[ -d ~/.local/share/nvim/plugged ]]; then
+    # link vim's plugged directory to neovim's, to save space
+    ln -s ../.local/share/nvim/plugged ~/.vim/plugged
+  elif command -v vim >/dev/null 2>&1; then
+    vim +"$vim_cmd" || true
+  fi
 fi
 if [[ ${castles[zsh]+x} ]]; then
   mkdir "$HOME/.zsh/cache"
-  echo "Exit the child shell and run 'exec zsh' if everything looks good:"
-  zsh
+  if (( unattended )); then
+    # install all plugins immediately (effectively disables turbo mode)
+    zsh -i -c -- '@zinit-scheduler burst'
+  else
+    echo "Exit the child shell and run 'exec zsh' if everything looks good:"
+    zsh
+  fi
 fi
